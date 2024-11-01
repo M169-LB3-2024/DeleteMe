@@ -48,7 +48,7 @@ app.get('/users', (req, res) => {
         } else {
             // Display the users in an HTML table
             let tableRows = results.map(user => 
-                `<tr><td>${user.id}</td><td>${user.name}</td><td>${user.email}</td></tr>`
+                `<tr><td>${user.id}</td><td>${user.surname}</td><td>${user.lastname}</td></tr>`
             ).join('');
 
             res.send(`
