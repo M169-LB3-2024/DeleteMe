@@ -22,15 +22,57 @@ const pool = mysql.createPool(dbConfig);
 app.get('/users', (req, res) => {
     const query = 'SELECT * FROM users';
 
-    // Use a connection from the pool for each request
     pool.query(query, (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
             res.status(500).send('Error executing query');
         } else if (results.length === 0) {
-            res.send('Connection successful! No users found in the database.');
+            // Display a success message if no users are found
+            res.send(`
+                <html>
+                    <head>
+                        <title>Success</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; color: #333; }
+                            h1 { color: #4CAF50; }
+                            p { font-size: 1.2em; color: #666; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Congratulations! 🎉</h1>
+                        <p>You successfully connected to the MySQL database!</p>
+                        <p>No users found in the database, but everything is set up correctly.</p>
+                    </body>
+                </html>
+            `);
         } else {
-            res.json(results);
+            // Display the users in an HTML table
+            let tableRows = results.map(user => 
+                `<tr><td>${user.id}</td><td>${user.name}</td><td>${user.email}</td></tr>`
+            ).join('');
+
+            res.send(`
+                <html>
+                    <head>
+                        <title>User List</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; text-align: center; color: #333; }
+                            h1 { color: #4CAF50; }
+                            table { margin: auto; border-collapse: collapse; width: 50%; }
+                            th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>User List</h1>
+                        <p>Here are the users currently in the database:</p>
+                        <table>
+                            <tr><th>ID</th><th>Name</th><th>Email</th></tr>
+                            ${tableRows}
+                        </table>
+                    </body>
+                </html>
+            `);
         }
     });
 });
