@@ -5,38 +5,29 @@ const port = 3000;
 
 // MySQL configuration
 const dbConfig = {
-    host: 'db',
+    host: 'db',           // The Docker Compose service name for MySQL
     user: 'root',
     password: 'password',
     database: 'testdb',
-    port: 3306
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 10,  // Max number of connections in the pool
+    queueLimit: 0         // Unlimited queueing of connection requests
 };
 
-// Function to connect with retry logic
-function connectWithRetry() {
-    const db = mysql.createConnection(dbConfig);
-    db.connect((err) => {
-        if (err) {
-            console.error('Database connection failed, retrying in 5 seconds:', err);
-            setTimeout(connectWithRetry, 5000); // Retry after 5 seconds
-        } else {
-            console.log('Connected to MySQL');
-        }
-    });
-    return db;
-}
-
-const db = connectWithRetry();
+// Create a MySQL connection pool
+const pool = mysql.createPool(dbConfig);
 
 // Route to get all users from the "users" table
 app.get('/users', (req, res) => {
     const query = 'SELECT * FROM users';
-    db.query(query, (err, results) => {
+
+    // Use a connection from the pool for each request
+    pool.query(query, (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
             res.status(500).send('Error executing query');
         } else if (results.length === 0) {
-            // Display a success message if no users are found
             res.send('Connection successful! No users found in the database.');
         } else {
             res.json(results);
