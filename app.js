@@ -5,7 +5,7 @@ const port = 3000;
 
 // MySQL configuration
 const dbConfig = {
-    host: 'db',           // The Docker Compose service name for MySQL
+    host: 'db',
     user: 'root',
     password: 'password',
     database: 'testdb',
@@ -35,6 +35,9 @@ app.get('/users', (req, res) => {
         if (err) {
             console.error('Error executing query:', err);
             res.status(500).send('Error executing query');
+        } else if (results.length === 0) {
+            // Display a success message if no users are found
+            res.send('Connection successful! No users found in the database.');
         } else {
             res.json(results);
         }
